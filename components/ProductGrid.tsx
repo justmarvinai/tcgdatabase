@@ -3,18 +3,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Product, Category } from "@/lib/data";
 import { getUniqueValues, getUniqueStores, lowestPrice } from "@/lib/utils";
-import Filters from "./Filters";
+import Filters, { FilterState, EMPTY_FILTERS } from "./Filters";
 import ProductCard from "./ProductCard";
 import { LayoutGrid, List } from "lucide-react";
-
-const EMPTY_FILTERS = {
-  set: "",
-  productType: "",
-  language: "",
-  store: "",
-  minPrice: "",
-  maxPrice: "",
-};
 
 interface Props {
   products: Product[];
@@ -24,10 +15,9 @@ interface Props {
 export default function ProductGrid({ products, category }: Props) {
   const searchParams = useSearchParams();
   const highlight = searchParams.get("highlight") ?? "";
-  const [filters, setFilters] = useState({ ...EMPTY_FILTERS });
+  const [filters, setFilters] = useState<FilterState>({ ...EMPTY_FILTERS });
   const [gridView, setGridView] = useState(true);
 
-  // scroll to highlighted card
   useEffect(() => {
     if (highlight) {
       setTimeout(() => {
@@ -39,22 +29,28 @@ export default function ProductGrid({ products, category }: Props) {
     }
   }, [highlight]);
 
-  const scoped = category ? products.filter((p) => p.category === category) : products;
+  const scoped = category
+    ? products.filter((p) => p.category === category)
+    : products;
 
   const sets = getUniqueValues(scoped, "set");
   const productTypes = getUniqueValues(scoped, "productType");
   const languages = getUniqueValues(scoped, "language");
   const stores = getUniqueStores(scoped);
+  const showEra = category === "Pokémon";
 
   const handleChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const filtered = scoped.filter((p) => {
+    if (filters.era && p.era !== filters.era) return false;
     if (filters.set && p.set !== filters.set) return false;
-    if (filters.productType && p.productType !== filters.productType) return false;
+    if (filters.productType && p.productType !== filters.productType)
+      return false;
     if (filters.language && p.language !== filters.language) return false;
-    if (filters.store && !p.links.some((l) => l.store === filters.store)) return false;
+    if (filters.store && !p.links.some((l) => l.store === filters.store))
+      return false;
     const min = filters.minPrice ? parseFloat(filters.minPrice) : null;
     const max = filters.maxPrice ? parseFloat(filters.maxPrice) : null;
     const price = lowestPrice(p);
@@ -67,12 +63,13 @@ export default function ProductGrid({ products, category }: Props) {
     <div className="flex gap-8">
       {/* Sidebar */}
       <div className="hidden lg:block w-64 shrink-0">
-        <div className="sticky top-24 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div className="sticky top-24 bg-white rounded-xl border border-gray-200 shadow-sm p-5 max-h-[calc(100vh-7rem)] overflow-y-auto">
           <Filters
             sets={sets}
             productTypes={productTypes}
             languages={languages}
             stores={stores}
+            showEra={showEra}
             filters={filters}
             onChange={handleChange}
             onReset={() => setFilters({ ...EMPTY_FILTERS })}
@@ -85,7 +82,9 @@ export default function ProductGrid({ products, category }: Props) {
         {/* Toolbar */}
         <div className="flex items-center justify-between mb-4">
           <p className="text-sm text-gray-500">
-            <span className="font-semibold text-gray-900">{filtered.length}</span>{" "}
+            <span className="font-semibold text-gray-900">
+              {filtered.length}
+            </span>{" "}
             {filtered.length === 1 ? "Produkt" : "Produkte"} gefunden
           </p>
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">

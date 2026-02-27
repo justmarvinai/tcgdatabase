@@ -3,12 +3,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import { useProducts } from "@/lib/store";
-import { Category, Language, ProductType, StoreLink } from "@/lib/data";
+import {
+  Category,
+  Language,
+  ProductType,
+  StoreLink,
+  PokemonEra,
+  POKEMON_ERAS,
+} from "@/lib/data";
 
 const CATEGORIES: Category[] = ["Riftbound", "Pokémon"];
-
 const LANGUAGES: Language[] = ["Englisch", "Deutsch", "Chinesisch"];
-
 const PRODUCT_TYPES: ProductType[] = [
   "Display",
   "Slim Display",
@@ -20,25 +25,27 @@ const PRODUCT_TYPES: ProductType[] = [
   "Kollektion",
 ];
 
-const RIFTBOUND_SETS = ["Origins", "Spiritforged"];
-const POKEMON_SETS = [
-  "SWSH: Kampfstile",
-  "SWSH: Brilliant Stars",
-  "SWSH: Astral Radiance",
-  "S&M: Nacht in Flammen",
-  "S&M: Aufziehen der Sturmröte",
-  "Karmesin & Purpur: Paldean Fates",
+const POKEMON_ERA_ORDER: PokemonEra[] = [
+  "XY Series",
+  "Sun & Moon",
+  "Sword & Shield",
+  "Scarlet & Violet",
+  "Mega Evolution",
 ];
 
+const ERA_COLORS: Record<PokemonEra, { btn: string; active: string }> = {
+  "XY Series":        { btn: "border-blue-200 text-blue-700 bg-blue-50",       active: "bg-blue-600 text-white border-blue-600" },
+  "Sun & Moon":       { btn: "border-orange-200 text-orange-700 bg-orange-50", active: "bg-orange-500 text-white border-orange-500" },
+  "Sword & Shield":   { btn: "border-emerald-200 text-emerald-700 bg-emerald-50", active: "bg-emerald-600 text-white border-emerald-600" },
+  "Scarlet & Violet": { btn: "border-rose-200 text-rose-700 bg-rose-50",       active: "bg-rose-600 text-white border-rose-600" },
+  "Mega Evolution":   { btn: "border-purple-200 text-purple-700 bg-purple-50", active: "bg-purple-600 text-white border-purple-600" },
+};
+
+const RIFTBOUND_SETS = ["Origins", "Spiritforged"];
+
 const KNOWN_STORES = [
-  "Innventory",
-  "Yonko TCG",
-  "Card Corner",
-  "Sapphire Cards",
-  "Wizzards Inn",
-  "Good Game Guys",
-  "Peer Online",
-  "Voxymoron",
+  "Innventory", "Yonko TCG", "Card Corner", "Sapphire Cards",
+  "Wizzards Inn", "Good Game Guys", "Peer Online", "Voxymoron",
 ];
 
 function storeFromUrl(url: string): string {
@@ -61,12 +68,7 @@ function storeFromUrl(url: string): string {
 }
 
 const emptyLink = (): Partial<StoreLink> => ({
-  url: "",
-  store: "",
-  price: undefined,
-  unit: "",
-  shipping: "",
-  variant: "",
+  url: "", store: "", price: undefined, unit: "", shipping: "", variant: "",
 });
 
 export default function AddPage() {
@@ -75,6 +77,7 @@ export default function AddPage() {
 
   const [category, setCategory] = useState<Category>("Riftbound");
   const [name, setName] = useState("");
+  const [era, setEra] = useState<PokemonEra | "">("");
   const [set, setSet] = useState("");
   const [customSet, setCustomSet] = useState("");
   const [language, setLanguage] = useState<Language>("Englisch");
@@ -85,18 +88,17 @@ export default function AddPage() {
   const [success, setSuccess] = useState(false);
 
   const availableSets =
-    category === "Riftbound" ? RIFTBOUND_SETS : POKEMON_SETS;
+    category === "Riftbound"
+      ? RIFTBOUND_SETS
+      : era
+      ? POKEMON_ERAS[era]
+      : [];
 
-  const updateLink = (
-    index: number,
-    field: keyof StoreLink,
-    value: string | number
-  ) => {
+  const updateLink = (index: number, field: keyof StoreLink, value: string | number) => {
     setLinks((prev) =>
       prev.map((l, i) => {
         if (i !== index) return l;
         const updated = { ...l, [field]: value };
-        // Auto-fill store from URL
         if (field === "url" && typeof value === "string") {
           const auto = storeFromUrl(value);
           if (auto) updated.store = auto;
@@ -108,16 +110,28 @@ export default function AddPage() {
   };
 
   const addLink = () => setLinks((prev) => [...prev, emptyLink()]);
-  const removeLink = (i: number) =>
-    setLinks((prev) => prev.filter((_, idx) => idx !== i));
+  const removeLink = (i: number) => setLinks((prev) => prev.filter((_, idx) => idx !== i));
+
+  const handleCategoryChange = (c: Category) => {
+    setCategory(c);
+    setEra("");
+    setSet("");
+    setCustomSet("");
+  };
+
+  const handleEraChange = (e: PokemonEra) => {
+    setEra(e);
+    setSet("");
+    setCustomSet("");
+  };
 
   const handleSubmit = () => {
     setError("");
     const finalSet = set === "__custom__" ? customSet.trim() : set;
     if (!name.trim()) return setError("Produktname ist erforderlich.");
     if (!finalSet) return setError("Bitte wähle oder gib ein Set ein.");
-    if (links.length === 0)
-      return setError("Mindestens ein Shop-Link ist erforderlich.");
+    if (category === "Pokémon" && !era) return setError("Bitte wähle eine Era.");
+    if (links.length === 0) return setError("Mindestens ein Shop-Link ist erforderlich.");
 
     const validLinks: StoreLink[] = [];
     for (const l of links) {
@@ -137,6 +151,7 @@ export default function AddPage() {
 
     addProduct({
       category,
+      era: category === "Pokémon" && era ? era : undefined,
       name: name.trim(),
       set: finalSet,
       language,
@@ -163,7 +178,6 @@ export default function AddPage() {
 
   const inputCls =
     "w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-white transition";
-
   const labelCls = "block text-xs font-semibold text-gray-600 mb-1";
 
   return (
@@ -184,10 +198,7 @@ export default function AddPage() {
               <button
                 key={c}
                 type="button"
-                onClick={() => {
-                  setCategory(c);
-                  setSet("");
-                }}
+                onClick={() => handleCategoryChange(c)}
                 className={`py-2.5 rounded-lg text-sm font-semibold border transition ${
                   category === c
                     ? c === "Riftbound"
@@ -202,6 +213,30 @@ export default function AddPage() {
           </div>
         </div>
 
+        {/* Pokémon Era picker */}
+        {category === "Pokémon" && (
+          <div>
+            <label className={labelCls}>Era *</label>
+            <div className="grid grid-cols-1 gap-1.5">
+              {POKEMON_ERA_ORDER.map((e) => {
+                const c = ERA_COLORS[e];
+                return (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => handleEraChange(e)}
+                    className={`text-sm font-semibold px-3 py-2 rounded-lg border text-left transition ${
+                      era === e ? c.active : c.btn + " hover:opacity-80"
+                    }`}
+                  >
+                    {e}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Name */}
         <div>
           <label className={labelCls}>Produktname *</label>
@@ -212,7 +247,7 @@ export default function AddPage() {
             placeholder={
               category === "Riftbound"
                 ? "z.B. Riftbound: Spiritforged (Slim)"
-                : "z.B. SWSH: Brilliant Stars 3-Pack-Blister"
+                : "z.B. Brilliant Stars 3-Pack-Blister"
             }
             className={inputCls}
           />
@@ -221,28 +256,34 @@ export default function AddPage() {
         {/* Set + Language */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelCls}>Set / Edition *</label>
-            <select
-              value={set}
-              onChange={(e) => setSet(e.target.value)}
-              className={inputCls}
-            >
-              <option value="">Set wählen…</option>
-              {availableSets.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-              <option value="__custom__">+ Neues Set eingeben</option>
-            </select>
-            {set === "__custom__" && (
-              <input
-                type="text"
-                value={customSet}
-                onChange={(e) => setCustomSet(e.target.value)}
-                placeholder="Set-Name eingeben"
-                className={`${inputCls} mt-2`}
-              />
+            <label className={labelCls}>Set *</label>
+            {category === "Pokémon" && !era ? (
+              <div className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-400">
+                Bitte erst eine Era wählen
+              </div>
+            ) : (
+              <>
+                <select
+                  value={set}
+                  onChange={(e) => setSet(e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">Set wählen…</option>
+                  {availableSets.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                  <option value="__custom__">+ Neues Set eingeben</option>
+                </select>
+                {set === "__custom__" && (
+                  <input
+                    type="text"
+                    value={customSet}
+                    onChange={(e) => setCustomSet(e.target.value)}
+                    placeholder="Set-Name eingeben"
+                    className={`${inputCls} mt-2`}
+                  />
+                )}
+              </>
             )}
           </div>
 
@@ -254,9 +295,7 @@ export default function AddPage() {
               className={inputCls}
             >
               {LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
+                <option key={l} value={l}>{l}</option>
               ))}
             </select>
           </div>
@@ -271,9 +310,7 @@ export default function AddPage() {
             className={inputCls}
           >
             {PRODUCT_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
+              <option key={t} value={t}>{t}</option>
             ))}
           </select>
         </div>
@@ -290,7 +327,6 @@ export default function AddPage() {
           />
         </div>
 
-        {/* Divider */}
         <hr className="border-gray-100" />
 
         {/* Links */}
@@ -311,26 +347,16 @@ export default function AddPage() {
 
           <div className="space-y-4">
             {links.map((link, i) => (
-              <div
-                key={i}
-                className="border border-gray-200 rounded-xl p-4 space-y-3 bg-gray-50"
-              >
+              <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3 bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-gray-500">
-                    Shop {i + 1}
-                  </span>
+                  <span className="text-xs font-semibold text-gray-500">Shop {i + 1}</span>
                   {links.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeLink(i)}
-                      className="text-red-400 hover:text-red-600 transition"
-                    >
+                    <button type="button" onClick={() => removeLink(i)} className="text-red-400 hover:text-red-600 transition">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
 
-                {/* URL */}
                 <div>
                   <label className={labelCls}>URL *</label>
                   <div className="relative">
@@ -342,12 +368,7 @@ export default function AddPage() {
                       className={`${inputCls} pr-8`}
                     />
                     {link.url && (
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600"
-                      >
+                      <a href={link.url} target="_blank" rel="noopener noreferrer" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-indigo-600">
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
@@ -355,7 +376,6 @@ export default function AddPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {/* Store */}
                   <div>
                     <label className={labelCls}>Shop-Name *</label>
                     <input
@@ -366,13 +386,10 @@ export default function AddPage() {
                       className={inputCls}
                     />
                     <datalist id={`stores-${i}`}>
-                      {KNOWN_STORES.map((s) => (
-                        <option key={s} value={s} />
-                      ))}
+                      {KNOWN_STORES.map((s) => <option key={s} value={s} />)}
                     </datalist>
                   </div>
 
-                  {/* Price */}
                   <div>
                     <label className={labelCls}>Preis (€) *</label>
                     <input
@@ -380,15 +397,12 @@ export default function AddPage() {
                       step="0.01"
                       min="0"
                       value={link.price ?? ""}
-                      onChange={(e) =>
-                        updateLink(i, "price", parseFloat(e.target.value))
-                      }
+                      onChange={(e) => updateLink(i, "price", parseFloat(e.target.value))}
                       placeholder="49.99"
                       className={inputCls}
                     />
                   </div>
 
-                  {/* Shipping */}
                   <div>
                     <label className={labelCls}>Versandkosten *</label>
                     <input
@@ -400,7 +414,6 @@ export default function AddPage() {
                     />
                   </div>
 
-                  {/* Variant */}
                   <div>
                     <label className={labelCls}>Variante (optional)</label>
                     <input
@@ -417,14 +430,12 @@ export default function AddPage() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2.5 text-sm">
             {error}
           </div>
         )}
 
-        {/* Submit */}
         <button
           type="button"
           onClick={handleSubmit}

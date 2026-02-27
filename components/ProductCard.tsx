@@ -65,6 +65,11 @@ export default function ProductCard({ product, highlight }: Props) {
               >
                 {product.category}
               </span>
+              {product.era && (
+                <span className="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full font-medium">
+                  {product.era}
+                </span>
+              )}
               <span className="text-xs text-gray-500">
                 {LANG_FLAGS[product.language]} {product.language}
               </span>

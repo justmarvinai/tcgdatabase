@@ -1,5 +1,11 @@
 export type Language = "Englisch" | "Deutsch" | "Chinesisch";
 export type Category = "Riftbound" | "Pokémon";
+export type PokemonEra =
+  | "XY Series"
+  | "Sun & Moon"
+  | "Sword & Shield"
+  | "Scarlet & Violet"
+  | "Mega Evolution";
 export type ProductType =
   | "Display"
   | "Booster"
@@ -23,6 +29,7 @@ export interface Product {
   id: string;
   category: Category;
   name: string;
+  era?: PokemonEra; // only for Pokémon
   set: string;
   language: Language;
   productType: ProductType;
@@ -30,6 +37,37 @@ export interface Product {
   notes?: string;
   createdAt: string;
 }
+
+// ─── Pokémon Era → Sets mapping ───────────────────────────────────────────────
+export const POKEMON_ERAS: Record<PokemonEra, string[]> = {
+  "XY Series": [
+    "XY Base", "Flashfire", "Furious Fists", "Phantom Forces", "Primal Clash",
+    "Double Crisis", "Roaring Skies", "Ancient Origins", "BREAKthrough",
+    "BREAKpoint", "Generations", "Fates Collide", "Steam Siege", "Evolutions",
+  ],
+  "Sun & Moon": [
+    "Sun & Moon Base", "Guardians Rising", "Burning Shadows", "Shining Legends",
+    "Crimson Invasion", "Ultra Prism", "Forbidden Light", "Celestial Storm",
+    "Dragon Majesty", "Lost Thunder", "Team Up", "Detective Pikachu",
+    "Unbroken Bonds", "Unified Minds", "Hidden Fates", "Cosmic Eclipse",
+  ],
+  "Sword & Shield": [
+    "Sword & Shield Base", "Rebel Clash", "Darkness Ablaze", "Champions Path",
+    "Vivid Voltage", "Shining Fates", "Battle Styles", "Brilliant Stars",
+    "Astral Radiance", "Pokemon GO", "Lost Origin", "Silver Tempest",
+    "Crown Zenith",
+  ],
+  "Scarlet & Violet": [
+    "Scarlet & Violet Base", "Paldea Evolved", "Obsidian Flames", "151",
+    "Paradox Rift", "Paldean Fates", "Temporal Forces", "Twilight Masquerade",
+    "Shrouded Fable", "Stellar Crown", "Surging Sparks", "Prismatic Evolution",
+    "Journey Together", "Destined Rivals", "Black Bolt", "White Flare",
+  ],
+  "Mega Evolution": [
+    "Mega Evolution Base", "Phantasmal Flames", "Ascended Heroes",
+    "Perfect Order", "Chaos Rising",
+  ],
+};
 
 function storeFromUrl(url: string): string {
   try {
@@ -217,11 +255,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: SWSH Kampfstile Display (DE) ─────────────────────────────────
+  // ── Pokémon: Battle Styles Display (DE) → Sword & Shield
   {
     category: "Pokémon",
-    name: "SWSH: Kampfstile",
-    set: "SWSH: Kampfstile",
+    era: "Sword & Shield",
+    name: "Battle Styles Display",
+    set: "Battle Styles",
     language: "Deutsch",
     productType: "Display",
     createdAt: "2025-02-27",
@@ -236,11 +275,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: SWSH Kampfstile Booster (DE) ─────────────────────────────────
+  // ── Pokémon: Battle Styles Booster (DE) → Sword & Shield
   {
     category: "Pokémon",
-    name: "SWSH: Kampfstile Booster",
-    set: "SWSH: Kampfstile",
+    era: "Sword & Shield",
+    name: "Battle Styles Booster",
+    set: "Battle Styles",
     language: "Deutsch",
     productType: "Booster",
     createdAt: "2025-02-27",
@@ -255,11 +295,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: S&M Nacht in Flammen (DE) ────────────────────────────────────
+  // ── Pokémon: Burning Shadows Sleeved Booster (DE) → Sun & Moon
   {
     category: "Pokémon",
-    name: "S&M: Nacht in Flammen",
-    set: "S&M: Nacht in Flammen",
+    era: "Sun & Moon",
+    name: "Burning Shadows Sleeved Booster",
+    set: "Burning Shadows",
     language: "Deutsch",
     productType: "Sleeved Booster",
     createdAt: "2025-02-27",
@@ -274,11 +315,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: S&M Aufziehen der Sturmröte (DE) ─────────────────────────────
+  // ── Pokémon: Crimson Invasion Sleeved Booster (DE) → Sun & Moon
   {
     category: "Pokémon",
-    name: "S&M: Aufziehen der Sturmröte",
-    set: "S&M: Aufziehen der Sturmröte",
+    era: "Sun & Moon",
+    name: "Crimson Invasion Sleeved Booster",
+    set: "Crimson Invasion",
     language: "Deutsch",
     productType: "Sleeved Booster",
     createdAt: "2025-02-27",
@@ -293,11 +335,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: SWSH Galar Gallopa V Kollektion (DE) ─────────────────────────
+  // ── Pokémon: Battle Styles Galar Gallopa V Kollektion (DE) → Sword & Shield
   {
     category: "Pokémon",
-    name: "SWSH: Galar Gallopa V Kollektion",
-    set: "SWSH: Kampfstile",
+    era: "Sword & Shield",
+    name: "Battle Styles Galar Gallopa V Kollektion",
+    set: "Battle Styles",
     language: "Deutsch",
     productType: "Kollektion",
     createdAt: "2025-02-27",
@@ -312,11 +355,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: SWSH Brilliant Stars 3-Pack-Blister (EN) ─────────────────────
+  // ── Pokémon: Brilliant Stars 3-Pack-Blister (EN) → Sword & Shield
   {
     category: "Pokémon",
-    name: "SWSH: Brilliant Stars 3-Pack-Blister",
-    set: "SWSH: Brilliant Stars",
+    era: "Sword & Shield",
+    name: "Brilliant Stars 3-Pack-Blister",
+    set: "Brilliant Stars",
     language: "Englisch",
     productType: "3-Pack-Blister",
     createdAt: "2025-02-27",
@@ -340,11 +384,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: SWSH Astral Radiance 3-Pack-Blister (EN) ─────────────────────
+  // ── Pokémon: Astral Radiance 3-Pack-Blister (EN) → Sword & Shield
   {
     category: "Pokémon",
-    name: "SWSH: Astral Radiance 3-Pack-Blister",
-    set: "SWSH: Astral Radiance",
+    era: "Sword & Shield",
+    name: "Astral Radiance 3-Pack-Blister",
+    set: "Astral Radiance",
     language: "Englisch",
     productType: "3-Pack-Blister",
     createdAt: "2025-02-27",
@@ -368,11 +413,12 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
-  // ── Pokémon: Paldean Fates Booster Bundle (EN) ────────────────────────────
+  // ── Pokémon: Paldean Fates Booster Bundle (EN) → Scarlet & Violet
   {
     category: "Pokémon",
-    name: "Karmesin & Purpur: Paldean Fates Booster Bundle",
-    set: "Karmesin & Purpur: Paldean Fates",
+    era: "Scarlet & Violet",
+    name: "Paldean Fates Booster Bundle",
+    set: "Paldean Fates",
     language: "Englisch",
     productType: "Booster Bundle",
     createdAt: "2025-02-27",
