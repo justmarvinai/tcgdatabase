@@ -45,7 +45,7 @@ const RIFTBOUND_SETS = ["Origins", "Spiritforged"];
 
 const KNOWN_STORES = [
   "Innventory", "Yonko TCG", "Card Corner", "Sapphire Cards",
-  "Wizzards Inn", "Good Game Guys", "Peer Online", "Voxymoron",
+  "Good Game Guys", "Peer Online", "Voxymoron",
 ];
 
 function storeFromUrl(url: string): string {
@@ -56,7 +56,6 @@ function storeFromUrl(url: string): string {
       "yonko-tcg.de": "Yonko TCG",
       "card-corner.de": "Card Corner",
       "sapphire-cards.de": "Sapphire Cards",
-      "wizzardsinn.de": "Wizzards Inn",
       "goodgameguys.de": "Good Game Guys",
       "peer-online.de": "Peer Online",
       "voxymoron.de": "Voxymoron",
@@ -127,22 +126,24 @@ export default function AddPage() {
 
   const handleSubmit = () => {
     setError("");
+    // Era must come first for Pokémon so the user knows what to fix
+    if (category === "Pokémon" && !era) return setError("Bitte wähle zuerst eine Era.");
     const finalSet = set === "__custom__" ? customSet.trim() : set;
     if (!name.trim()) return setError("Produktname ist erforderlich.");
     if (!finalSet) return setError("Bitte wähle oder gib ein Set ein.");
-    if (category === "Pokémon" && !era) return setError("Bitte wähle eine Era.");
     if (links.length === 0) return setError("Mindestens ein Shop-Link ist erforderlich.");
 
     const validLinks: StoreLink[] = [];
     for (const l of links) {
       if (!l.url?.trim()) return setError("Alle Links brauchen eine URL.");
       if (!l.store?.trim()) return setError("Alle Links brauchen einen Shop-Namen.");
-      if (!l.price || l.price <= 0) return setError("Bitte gib einen gültigen Preis an.");
+      const price = Number(l.price);
+      if (!l.price || isNaN(price) || price <= 0) return setError("Bitte gib einen gültigen Preis an.");
       if (!l.shipping?.trim()) return setError("Bitte gib die Versandkosten an.");
       validLinks.push({
         url: l.url.trim(),
         store: l.store.trim(),
-        price: Number(l.price),
+        price,
         unit: l.unit?.trim() || productType,
         shipping: l.shipping.trim(),
         variant: l.variant?.trim() || undefined,
