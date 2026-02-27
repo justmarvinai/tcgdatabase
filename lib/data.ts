@@ -92,7 +92,7 @@ const raw: Omit<Product, "id">[] = [
   // ── Riftbound: Spiritforged (EN) ───────────────────────────────────────────
   {
     category: "Riftbound",
-    name: "Riftbound: Spiritforged",
+    name: "Spiritforged Display",
     set: "Spiritforged",
     language: "Englisch",
     productType: "Display",
@@ -111,7 +111,7 @@ const raw: Omit<Product, "id">[] = [
   // ── Riftbound: Origins (EN) ────────────────────────────────────────────────
   {
     category: "Riftbound",
-    name: "Riftbound: Origins",
+    name: "Origins Display",
     set: "Origins",
     language: "Englisch",
     productType: "Display",
@@ -130,7 +130,7 @@ const raw: Omit<Product, "id">[] = [
   // ── Riftbound: Spiritforged (ZH) ──────────────────────────────────────────
   {
     category: "Riftbound",
-    name: "Riftbound: Spiritforged (Slim)",
+    name: "Spiritforged (Slim Display)",
     set: "Spiritforged",
     language: "Chinesisch",
     productType: "Slim Display",
@@ -161,7 +161,7 @@ const raw: Omit<Product, "id">[] = [
   },
   {
     category: "Riftbound",
-    name: "Riftbound: Spiritforged (Jumbo)",
+    name: "Spiritforged (Jumbo Display)",
     set: "Spiritforged",
     language: "Chinesisch",
     productType: "Jumbo Display",
@@ -194,7 +194,7 @@ const raw: Omit<Product, "id">[] = [
   // ── Riftbound: Origins (ZH) ───────────────────────────────────────────────
   {
     category: "Riftbound",
-    name: "Riftbound: Origins (Slim)",
+    name: "Origins (Slim Display)",
     set: "Origins",
     language: "Chinesisch",
     productType: "Slim Display",
@@ -225,7 +225,7 @@ const raw: Omit<Product, "id">[] = [
   },
   {
     category: "Riftbound",
-    name: "Riftbound: Origins (Jumbo)",
+    name: "Origins (Jumbo Display)",
     set: "Origins",
     language: "Chinesisch",
     productType: "Jumbo Display",

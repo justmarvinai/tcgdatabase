@@ -10,7 +10,7 @@ import { Product, INITIAL_PRODUCTS } from "./data";
 
 // Bump this number whenever INITIAL_PRODUCTS changes structurally
 // so existing users automatically get the fresh seed data.
-const DATA_VERSION = 4;
+const DATA_VERSION = 5;
 const VERSION_KEY = "tcg-data-version";
 const PRODUCTS_KEY = "tcg-products";
 
