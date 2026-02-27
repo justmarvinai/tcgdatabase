@@ -295,6 +295,26 @@ const raw: Omit<Product, "id">[] = [
     ],
   },
 
+  // ── Pokémon: Battle Styles Galar Rapidash V Collection (DE) → Sword & Shield
+  {
+    category: "Pokémon",
+    era: "Sword & Shield",
+    name: "Battle Styles Galar Rapidash V Kollektion",
+    set: "Battle Styles",
+    language: "Deutsch",
+    productType: "Kollektion",
+    createdAt: "2025-02-27",
+    links: [
+      {
+        url: "https://wizzardsinn.de/index.php/produkt/galar-gallopa-v-box-ger/",
+        store: storeFromUrl("https://wizzardsinn.de"),
+        price: 24.99,
+        unit: "Kollektion",
+        shipping: "Unbekannt",
+      },
+    ],
+  },
+
   // ── Pokémon: Burning Shadows Sleeved Booster (DE) → Sun & Moon
   {
     category: "Pokémon",
@@ -330,26 +350,6 @@ const raw: Omit<Product, "id">[] = [
         store: storeFromUrl("https://www.goodgameguys.de"),
         price: 14.95,
         unit: "Sleeved Booster",
-        shipping: "Unbekannt",
-      },
-    ],
-  },
-
-  // ── Pokémon: Battle Styles Galar Gallopa V Kollektion (DE) → Sword & Shield
-  {
-    category: "Pokémon",
-    era: "Sword & Shield",
-    name: "Battle Styles Galar Gallopa V Kollektion",
-    set: "Battle Styles",
-    language: "Deutsch",
-    productType: "Kollektion",
-    createdAt: "2025-02-27",
-    links: [
-      {
-        url: "https://wizzardsinn.de/index.php/produkt/galar-gallopa-v-box-ger/",
-        store: storeFromUrl("https://wizzardsinn.de"),
-        price: 24.99,
-        unit: "Kollektion",
         shipping: "Unbekannt",
       },
     ],

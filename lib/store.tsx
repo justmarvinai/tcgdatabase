@@ -8,6 +8,12 @@ import React, {
 } from "react";
 import { Product, INITIAL_PRODUCTS } from "./data";
 
+// Bump this number whenever INITIAL_PRODUCTS changes structurally
+// so existing users automatically get the fresh seed data.
+const DATA_VERSION = 3;
+const VERSION_KEY = "tcg-data-version";
+const PRODUCTS_KEY = "tcg-products";
+
 interface Store {
   products: Product[];
   addProduct: (p: Omit<Product, "id" | "createdAt">) => void;
@@ -21,12 +27,17 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("tcg-products");
-      if (saved) {
+      const storedVersion = Number(localStorage.getItem(VERSION_KEY) ?? "0");
+      const saved = localStorage.getItem(PRODUCTS_KEY);
+
+      if (saved && storedVersion >= DATA_VERSION) {
+        // Cache is current — use it
         setProducts(JSON.parse(saved));
       } else {
+        // Stale or missing — seed fresh data and stamp version
         setProducts(INITIAL_PRODUCTS);
-        localStorage.setItem("tcg-products", JSON.stringify(INITIAL_PRODUCTS));
+        localStorage.setItem(PRODUCTS_KEY, JSON.stringify(INITIAL_PRODUCTS));
+        localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
       }
     } catch {
       setProducts(INITIAL_PRODUCTS);
@@ -36,7 +47,8 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   const save = (next: Product[]) => {
     setProducts(next);
     try {
-      localStorage.setItem("tcg-products", JSON.stringify(next));
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(next));
+      localStorage.setItem(VERSION_KEY, String(DATA_VERSION));
     } catch {}
   };
 
